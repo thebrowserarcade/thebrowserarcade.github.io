@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <meta name="description" content="A curated menu of browser-playable games.">
+  <title>Game Menu</title>
+  <style>
+    :root{color-scheme:dark;--bg:#050505;--panel:rgba(15,15,15,.82);--panel2:#191919;--line:#303030;--text:#f5f5f5;--muted:#a2a2a2;--accent:#fff}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scrollbar-color:#555 #080808}
+    body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,#202020 0,transparent 52%),linear-gradient(#050505,#080808 60%,#030303)}
+    #starfield{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+    a{color:inherit;text-decoration:none}
+    .shell{width:min(1160px,calc(100% - 36px));margin:auto}
+    .request-banner{position:relative;z-index:2;text-align:center;padding:11px 16px;background:#f4f4f4;color:#080808;font-size:.83rem;font-weight:700;letter-spacing:.015em;border-bottom:1px solid #fff}
+    .request-banner strong{font-weight:900;text-decoration:underline;text-underline-offset:3px}
+    header{padding:54px 0 28px}
+    .eyebrow{display:flex;align-items:center;gap:9px;color:#cfcfcf;font-size:.75rem;font-weight:800;letter-spacing:.19em;text-transform:uppercase}
+    .dot{width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 14px #ffffffaa;animation:pulse 2.5s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+    h1{font-size:clamp(2.7rem,7vw,5.3rem);line-height:.98;letter-spacing:-.065em;margin:18px 0 14px;font-weight:850}
+    h1 span{color:#8b8b8b}
+    .intro{color:var(--muted);max-width:610px;margin:0;font-size:1.02rem}
+    .toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:28px 0 22px}
+    .search{flex:1 1 250px;position:relative}
+    .search input{width:100%;padding:14px 16px 14px 44px;border-radius:10px;border:1px solid #353535;background:rgba(12,12,12,.88);color:var(--text);font:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+    .search input:focus{border-color:#aaa;box-shadow:0 0 0 3px #ffffff0d}
+    .search:before{content:"⌕";position:absolute;left:15px;top:7px;font-size:1.65rem;color:#aaa}
+    .filters{display:flex;gap:7px;flex-wrap:wrap}
+    .filter{border:1px solid #353535;background:rgba(13,13,13,.88);color:#aaa;padding:10px 13px;border-radius:9px;font:inherit;font-size:.83rem;font-weight:650;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+    .filter.active,.filter:hover{border-color:#eee;color:#050505;background:#f1f1f1}
+    .section-head{display:flex;justify-content:space-between;align-items:center;margin:28px 0 14px}
+    .section-head h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.17em;color:#c7c7c7;margin:0}
+    #count{font-size:.8rem;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;padding-bottom:64px}
+    .game{min-width:0;display:flex;flex-direction:column;min-height:158px;padding:19px;border:1px solid #292929;border-radius:13px;background:linear-gradient(145deg,rgba(23,23,23,.92),rgba(9,9,9,.9));transition:transform .2s,border-color .2s,background .2s,box-shadow .2s;backdrop-filter:blur(5px)}
+    .game:hover{transform:translateY(-4px);border-color:#aaa;background:linear-gradient(145deg,rgba(34,34,34,.96),rgba(13,13,13,.95));box-shadow:0 12px 34px #0008,0 0 0 1px #ffffff08}
+    .game-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .icon{display:grid;place-items:center;max-width:90px;min-width:39px;height:39px;padding:0 8px;border-radius:9px;background:#ffffff08;border:1px solid #ffffff20;color:#eee;font-weight:850;font-size:.76rem;letter-spacing:-.035em}
+    .arrow{color:#737373;font-size:1.2rem;transition:transform .18s,color .18s}
+    .game:hover .arrow{color:#fff;transform:translate(2px,-2px)}
+    .game h3{font-size:1.04rem;margin:17px 0 4px;letter-spacing:-.02em}
+    .game p{font-size:.78rem;color:var(--muted);margin:0;overflow-wrap:anywhere}
+    .game[hidden]{display:none!important}
+    .empty{grid-column:1/-1;text-align:center;padding:44px;color:var(--muted);border:1px dashed #383838;border-radius:12px;background:#080808b8}
+    footer{border-top:1px solid #252525;padding:22px 0 30px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.82rem}
+    footer strong{color:#f5f5f5;font-weight:650}
+    .mouse-glow{position:fixed;width:230px;height:230px;border-radius:50%;pointer-events:none;z-index:0;transform:translate(-50%,-50%);background:radial-gradient(circle,#ffffff09 0,transparent 68%);mix-blend-mode:screen}
+    header,main,footer{position:relative;z-index:1}
+    @media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){header{padding-top:38px}.shell{width:min(100% - 24px,1160px)}.grid{grid-template-columns:1fr;gap:10px}.game{min-height:135px}.filters{width:100%}.filter{flex:1;padding:10px 8px}.request-banner{font-size:.76rem}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="request-banner">Have a game request? Contact <strong>compleksity</strong> on Discord and suggest it.</div>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="mouse-glow" id="mouseGlow" aria-hidden="true"></div>
+  <div class="shell">
+    <header>
+      <div class="eyebrow"><span class="dot"></span> The browser arcade</div>
+      <h1>Pick a game.<br><span>Press play.</span></h1>
+      <p class="intro">A hand-picked collection of classic shooters, zombie maps, sports games and more. Choose a title to open it in a new tab.</p>
+      <div class="toolbar">
+        <label class="search"><input id="search" type="search" placeholder="Search games..." aria-label="Search games"></label>
+        <div class="filters" aria-label="Filter games">
+          <button type="button" class="filter active" data-filter="All">All games</button>
+          <button type="button" class="filter" data-filter="FPS">FPS</button>
+          <button type="button" class="filter" data-filter="Zombies">Zombies</button>
+          <button type="button" class="filter" data-filter="Sports">Sports</button>
+          <button type="button" class="filter" data-filter="Other">Other</button>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="section-head"><h2>Game library</h2><span id="count" aria-live="polite">24 games</span></div>
+      <div class="grid" id="games">
+        <a class="game" href="https://vel.gg/bo1z" target="_blank" rel="noopener noreferrer" data-title="BO1 Zombies" data-category="Zombies"><div class="game-top"><span class="icon">BO1</span><span class="arrow">↗</span></div><h3>BO1 Zombies</h3><p>Zombies · Call of Duty</p></a>
+        <a class="game" href="https://moon-zombies.pages.dev" target="_blank" rel="noopener noreferrer" data-title="Moon" data-category="Zombies"><div class="game-top"><span class="icon">MOON</span><span class="arrow">↗</span></div><h3>Moon</h3><p>Zombies · Call of Duty</p></a>
+        <a class="game" href="https://kino-der-toten.pages.dev" target="_blank" rel="noopener noreferrer" data-title="Kino der Toten" data-category="Zombies"><div class="game-top"><span class="icon">KINO</span><span class="arrow">↗</span></div><h3>Kino der Toten</h3><p>Zombies · Call of Duty</p></a>
+        <a class="game" href="https://cheese-cube.pages.dev" target="_blank" rel="noopener noreferrer" data-title="BO3 Cheese Cube" data-category="Zombies"><div class="game-top"><span class="icon">BO3</span><span class="arrow">↗</span></div><h3>BO3 Cheese Cube</h3><p>Zombies · Call of Duty</p></a>
+        <a class="game" href="https://vibeslops.luckeysystems.com" target="_blank" rel="noopener noreferrer" data-title="Black Ops 2" data-category="FPS"><div class="game-top"><span class="icon">BO2</span><span class="arrow">↗</span></div><h3>Black Ops 2</h3><p>FPS · Call of Duty</p></a>
+        <a class="game" href="https://ovz-game-production.up.railway.app" target="_blank" rel="noopener noreferrer" data-title="Modern Warfare 2" data-category="FPS"><div class="game-top"><span class="icon">MW2</span><span class="arrow">↗</span></div><h3>Modern Warfare 2</h3><p>FPS · Call of Duty</p></a>
+        <a class="game" href="https://skate.aaddpp.lol" target="_blank" rel="noopener noreferrer" data-title="Skate 3" data-category="Sports"><div class="game-top"><span class="icon">S3</span><span class="arrow">↗</span></div><h3>Skate 3</h3><p>Sports · Skateboarding</p></a>
+        <a class="game" href="https://global-terror.net" target="_blank" rel="noopener noreferrer" data-title="Skate Rust" data-category="Sports"><div class="game-top"><span class="icon">SR</span><span class="arrow">↗</span></div><h3>Skate Rust</h3><p>Sports · Skateboarding</p></a>
+        <a class="game" href="https://surfd.net" target="_blank" rel="noopener noreferrer" data-title="CS Surf" data-category="FPS"><div class="game-top"><span class="icon">CS</span><span class="arrow">↗</span></div><h3>CS Surf</h3><p>FPS · Counter-Strike</p></a>
+        <a class="game" href="https://mitchellhynes.com/halo" target="_blank" rel="noopener noreferrer" data-title="Halo CE" data-category="FPS"><div class="game-top"><span class="icon">HALO</span><span class="arrow">↗</span></div><h3>Halo CE</h3><p>FPS · Halo</p></a>
+        <a class="game" href="https://hcemobile.com" target="_blank" rel="noopener noreferrer" data-title="Halo CE mobile" data-category="FPS"><div class="game-top"><span class="icon">H:M</span><span class="arrow">↗</span></div><h3>Halo CE mobile</h3><p>FPS · Halo</p></a>
+        <a class="game" href="https://pes6.optijuegos.net" target="_blank" rel="noopener noreferrer" data-title="PES 6" data-category="Sports"><div class="game-top"><span class="icon">PES</span><span class="arrow">↗</span></div><h3>PES 6</h3><p>Sports · Football</p></a>
+        <a class="game" href="https://web.archive.org/web/20261006055917/https://playgta5.com/" target="_blank" rel="noopener noreferrer" data-title="GTA 5" data-category="Other"><div class="game-top"><span class="icon">GTA V</span><span class="arrow">↗</span></div><h3>GTA 5</h3><p>Open world · GTA</p></a>
+        <a class="game" href="https://joncodeofficial.github.io/gta-vice-city-wasm" target="_blank" rel="noopener noreferrer" data-title="GTA Vice City" data-category="Other"><div class="game-top"><span class="icon">VC</span><span class="arrow">↗</span></div><h3>GTA Vice City</h3><p>Open world · GTA</p></a>
+        <a class="game" href="https://shar-wasm.cjoseph.workers.dev/?skipmovie" target="_blank" rel="noopener noreferrer" data-title="The Simpsons: Hit & Run" data-category="Other"><div class="game-top"><span class="icon">SIMP</span><span class="arrow">↗</span></div><h3>The Simpsons: Hit &amp; Run</h3><p>Adventure · The Simpsons</p></a>
+        <a class="game" href="https://q1.pieter.com" target="_blank" rel="noopener noreferrer" data-title="Quake 1" data-category="FPS"><div class="game-top"><span class="icon">Q1</span><span class="arrow">↗</span></div><h3>Quake 1</h3><p>FPS · Quake</p></a>
+        <a class="game" href="https://q2.pieter.com" target="_blank" rel="noopener noreferrer" data-title="Quake 2" data-category="FPS"><div class="game-top"><span class="icon">Q2</span><span class="arrow">↗</span></div><h3>Quake 2</h3><p>FPS · Quake</p></a>
+        <a class="game" href="https://q3.pieter.com" target="_blank" rel="noopener noreferrer" data-title="Quake 3" data-category="FPS"><div class="game-top"><span class="icon">Q3</span><span class="arrow">↗</span></div><h3>Quake 3</h3><p>FPS · Quake</p></a>
+        <a class="game" href="https://rtcw.pieter.com" target="_blank" rel="noopener noreferrer" data-title="Return to Castle Wolfenstein" data-category="FPS"><div class="game-top"><span class="icon">RTCW</span><span class="arrow">↗</span></div><h3>Return to Castle Wolfenstein</h3><p>FPS · Wolfenstein</p></a>
+        <a class="game" href="https://ut.pieter.com" target="_blank" rel="noopener noreferrer" data-title="Unreal Tournament" data-category="FPS"><div class="game-top"><span class="icon">UT</span><span class="arrow">↗</span></div><h3>Unreal Tournament</h3><p>FPS · Unreal</p></a>
+        <a class="game" href="https://pixelsuft.github.io/hl/" target="_blank" rel="noopener noreferrer" data-title="Half Life" data-category="FPS"><div class="game-top"><span class="icon">HL</span><span class="arrow">↗</span></div><h3>Half Life</h3><p>FPS · Half-Life</p></a>
+        <a class="game" href="https://x8bitrain.github.io/webXash/" target="_blank" rel="noopener noreferrer" data-title="Half Life / CS 1.6" data-category="FPS"><div class="game-top"><span class="icon">HL/CS</span><span class="arrow">↗</span></div><h3>Half Life / CS 1.6</h3><p>FPS · Half-Life / Counter-Strike</p></a>
+        <a class="game" href="https://johnimril.github.io/diablo_web/" target="_blank" rel="noopener noreferrer" data-title="Diablo" data-category="Other"><div class="game-top"><span class="icon">D</span><span class="arrow">↗</span></div><h3>Diablo</h3><p>RPG · Diablo</p></a>
+        <a class="game" href="https://webwars.link" target="_blank" rel="noopener noreferrer" data-title="Hedgewars" data-category="Other"><div class="game-top"><span class="icon">HW</span><span class="arrow">↗</span></div><h3>Hedgewars</h3><p>Strategy · Hedgewars</p></a>
+      </div>
+    </main>
+    <footer><span>Game Menu <span aria-hidden="true">/</span> Curated browser games</span><span>Created and credited to <strong>Dane Bellamy</strong></span></footer>
+  </div>
+  <script>
+    // Search and category filters
+    const search = document.querySelector('#search');
+    const cards = [...document.querySelectorAll('.game')];
+    const filters = [...document.querySelectorAll('.filter')];
+    const count = document.querySelector('#count');
+    const grid = document.querySelector('#games');
+    let category = 'All';
+    function update() {
+      const term = search.value.trim().toLowerCase();
+      let shown = 0;
+      cards.forEach(card => {
+        const matchesText = (card.dataset.title + ' ' + card.textContent).toLowerCase().includes(term);
+        const matchesCategory = category === 'All' || card.dataset.category === category;
+        const visible = matchesText && matchesCategory;
+        card.hidden = !visible;
+        if (visible) shown++;
+      });
+      count.textContent = `${shown} ${shown === 1 ? 'game' : 'games'}`;
+      let empty = grid.querySelector('.empty');
+      if (!shown && !empty) {
+        empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'No games match your search.';
+        grid.appendChild(empty);
+      } else if (shown && empty) empty.remove();
+    }
+    search.addEventListener('input', update);
+    filters.forEach(button => button.addEventListener('click', () => {
+      category = button.dataset.filter;
+      filters.forEach(item => {
+        const active = item === button;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+      update();
+    }));
+    filters.forEach(item => item.setAttribute('aria-pressed', String(item.classList.contains('active'))));
+    update();
+
+    // Animated constellation background with connected stars.
+    (() => {
+      const canvas = document.querySelector('#starfield');
+      const ctx = canvas.getContext('2d');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const mouseGlow = document.querySelector('#mouseGlow');
+      let width = 0, height = 0, dpr = 1, stars = [], pointer = {x:-1000,y:-1000}, trail = [];
+      const rand = (min,max) => min + Math.random() * (max-min);
+      function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth; height = window.innerHeight;
+        canvas.width = Math.floor(width*dpr); canvas.height = Math.floor(height*dpr);
+        canvas.style.width = width+'px'; canvas.style.height = height+'px';
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        const count = Math.min(115, Math.max(48, Math.floor(width*height/11500)));
+        stars = Array.from({length:count}, () => ({x:rand(0,width),y:rand(0,height),r:rand(.5,1.7),vx:rand(-.12,.12),vy:rand(-.1,.1),phase:rand(0,Math.PI*2)}));
+      }
+      function move(e) {
+        pointer.x=e.clientX; pointer.y=e.clientY;
+        if(mouseGlow){mouseGlow.style.left=pointer.x+'px';mouseGlow.style.top=pointer.y+'px';}
+        if(!reducedMotion) trail.push({x:pointer.x,y:pointer.y,life:1});
+        if(trail.length>22) trail.shift();
+      }
+      window.addEventListener('resize',resize,{passive:true});
+      window.addEventListener('pointermove',move,{passive:true});
+      window.addEventListener('pointerleave',()=>{pointer.x=-1000;pointer.y=-1000;},{passive:true});
+      resize();
+      let tick=0;
+      function draw(){
+        ctx.clearRect(0,0,width,height); tick += .012;
+        for(let i=0;i<stars.length;i++){
+          const s=stars[i];
+          if(!reducedMotion){s.x+=s.vx;s.y+=s.vy;if(s.x<0)s.x=width;if(s.x>width)s.x=0;if(s.y<0)s.y=height;if(s.y>height)s.y=0;}
+          const alpha=.35+.45*(.5+.5*Math.sin(tick*2+s.phase));
+          for(let j=i+1;j<stars.length;j++){
+            const t=stars[j],dx=s.x-t.x,dy=s.y-t.y,dist=Math.hypot(dx,dy);
+            if(dist<115){ctx.strokeStyle=`rgba(220,220,220,${(1-dist/115)*.17})`;ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(t.x,t.y);ctx.stroke();}
+          }
+          const md=Math.hypot(s.x-pointer.x,s.y-pointer.y);
+          if(md<145){ctx.strokeStyle=`rgba(255,255,255,${(1-md/145)*.36})`;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(pointer.x,pointer.y);ctx.stroke();}
+          ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${alpha})`;ctx.fill();
+        }
+        if(!reducedMotion){
+          trail.forEach((p,i)=>{
+            p.life-=.035;
+            if(i>0){const prev=trail[i-1];ctx.beginPath();ctx.moveTo(prev.x,prev.y);ctx.lineTo(p.x,p.y);ctx.strokeStyle=`rgba(255,255,255,${Math.max(0,p.life)*.22})`;ctx.lineWidth=Math.max(.2, p.life*2);ctx.stroke();}
+            ctx.beginPath();ctx.arc(p.x,p.y,Math.max(.1,p.life*2.1),0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${Math.max(0,p.life)*.38})`;ctx.fill();
+          });
+          trail=trail.filter(p=>p.life>0);
+          requestAnimationFrame(draw);
+        } else {
+          requestAnimationFrame(draw);
+        }
+      }
+      draw();
+    })();
+  </script>
+</body>
+</html>
