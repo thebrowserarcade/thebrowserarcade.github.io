@@ -9,7 +9,7 @@
   "use strict";
 
   // ===== CONFIGURE HERE: your Render backend URL (no trailing slash) =====
-  var BACKEND_URL = "var BACKEND_URL = "https://visitor-analytics-backend-1.onrender.com";";
+   var BACKEND_URL = "https://visitor-analytics-backend-1.onrender.com";
   // =======================================================================
 
   var ID_KEY = "tba_visitor_id";
